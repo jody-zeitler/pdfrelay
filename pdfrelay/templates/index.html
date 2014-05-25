@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+	<title>PDF Relay</title>
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/css/bootstrap.min.css">
+	<style>
+		body>.container {
+			margin-top: 20px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="row">
+			<div class="col-sm-12">Introduction and instructions.</div>
+		</div>
+
+		<hr>
+
+		<form action="/form" method="POST" target="_blank">
+			<div class="form-group">
+				<label for="commandLine">Command Line Arguments</label>
+				<textarea name="commandLine" id="commandLine" class="form-control" rows="3">--javascript-delay 5000</textarea>
+			</div>
+
+			<div class="form-group">
+				<label for="htmlInput">HTML Markup</label>
+				<textarea name="htmlInput" id="htmlInput" class="form-control" rows="20"></textarea>
+			</div>
+
+			<div class="form-group">
+				<button type="submit" id="convertButton" class="btn btn-primary">Convert Markup</button>
+			</div>
+		</form>
+	</div>
+
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.1.1/js/bootstrap.min.js"></script>
+
+	<script>
+		var $root = $('html').clone();
+		if ($root.find('base').length < 1) {
+			$root.find('head').prepend('\n\t<base href="http://cdnjs.cloudflare.com">');
+		}
+		$('#htmlInput').val( '<html>\n' + $root.html() + '\n</html>' );
+	</script>
+</body>
+</html>
