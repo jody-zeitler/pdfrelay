@@ -5,17 +5,24 @@ import os
 import subprocess
 import re
 
+from .exception import *
+
 class PdfEngine(object):
 	"""Engine that controls process management of the PDF converter"""
+	
 	def __init__(self, binary_path, process_timeout=30):
+		
 		if not os.access(binary_path, os.X_OK):
-			raise Exception('PDF engine binary path is not executable.')
+			raise EngineError('PDF engine binary path is not executable.')
+		
 		self.binary_path = binary_path
 		self.process_timeout = process_timeout
 
 
-	def render(self, html, arguments):
-		arguments = list(arguments) # copy
+	def render(self, job):
+		html = job.html
+
+		arguments = list(job.arguments) # copy
 		arguments.insert(0, self.binary_path)
 		arguments.append('-')
 		arguments.append('-')
@@ -29,7 +36,7 @@ class PdfEngine(object):
 		out,errs = proc.communicate(html.encode(), self.process_timeout)
 		
 		if errs and len(errs) > 0:
-			print(errs.decode())
+			job.error = errs.decode()
 
 		return out
 
@@ -37,18 +44,33 @@ class PdfEngine(object):
 
 class MetadataEngine(object):
 	"""Engine that works with PDF bytes to manipulate metadata"""
+	
 	def __init__(self):
 		self.defaults = {}
 
 	def add_metadata(self, inbytes, metadata):
 		"""Inject metadata in the proximity of already-known values"""
+		
 		m = re.search(rb'/Producer.*', inbytes)
 		if not m:
-			raise Exception('Producer metadata field is not found.')
+			raise MetadataError('Producer metadata field is not found.')
 
-		producer = m.group(0)
-		newattributes = producer + b'\n/Author (Jody Zeitler)'
+		# used as a proximity basis for injecting new metadata
+		producer_field = m.group(0)
+		new_attributes = producer_field
+		outbytes = inbytes
 
-		outbytes = re.sub(rb'/Producer.*', newattributes, inbytes)
+		for k,v in metadata.items():
+			bkey = b'/' + k.encode('ascii')
+			bval = v.encode('utf-8')
+			m = re.findall(bkey, outbytes)
+			if len(m) == 1:
+				outbytes = re.sub(bkey + b'.*', bkey + b' (' + bval + b')', outbytes)
+			elif len(m) > 1:
+				raise MetadataError('Field defined more than once.')
+			else:
+				new_attributes += b'\n' + bkey + b' (' + bval + b')'
+
+		outbytes = re.sub(rb'/Producer.*', new_attributes, outbytes)
 
 		return outbytes

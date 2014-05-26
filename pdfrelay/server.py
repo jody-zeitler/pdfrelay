@@ -31,6 +31,10 @@ def index():
 @app.route('/form', methods=['POST'])
 def form():
 	options = {}
+	options['metadata'] = {
+		'Author': request.form['metadataAuthor'],
+		'Subject': request.form['metadataSubject']
+	}
 	options['arguments'] = shlex.split(request.form['commandLine'])
 	options['html'] = request.form['htmlInput']
 	job = ConversionJob(options)
@@ -38,18 +42,18 @@ def form():
 
 
 def render_pdf(job):
-	try:
-		bytes = conversion_engine.render(job.html, job.arguments)
-		bytes = metadata_engine.add_metadata(bytes, job.metadata)
+	bytes = conversion_engine.render(job)
 
-		resp = make_response(bytes)
-		resp.headers['Content-Type'] = 'application/pdf'
-		resp.headers['Content-Disposition'] = "attachment; filename=test.pdf"
-		
-		return resp
+	if len(bytes) < 64:
+		return job.error
 	
-	except Exception as e:
-		return str(e)
+	bytes = metadata_engine.add_metadata(bytes, job.metadata)
+
+	resp = make_response(bytes)
+	resp.headers['Content-Type'] = 'application/pdf'
+	resp.headers['Content-Disposition'] = "attachment; filename=test.pdf"
+	
+	return resp
 
 
 def initialize(engine_path):

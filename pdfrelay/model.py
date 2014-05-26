@@ -2,18 +2,17 @@
 
 class ConversionJob(object):
 	"""Container class for passing around job data"""
+	
 	def __init__(self, options):
-		self.html = options['html']
-		self.arguments = []
-		self.metadata = {}
+		self.html = options.pop('html')
+		self.arguments = options.pop('arguments', [])
+		self.metadata = options.pop('metadata', {})
 		self.pdf = None
-
-		if 'arguments' in options.keys():
-			self.arguments = options['arguments']
+		self.error = None
 
 		for k,v in options.items():
 			if k.startswith('metadata'):
 				self.metadata[k[8:]] = v
-			elif k not in ('html', 'arguments'):
+			else:
 				self.arguments.append(k)
 				self.arguments.append(v)
