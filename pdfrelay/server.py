@@ -3,6 +3,7 @@
 import sys
 import os
 import shlex
+import html
 from flask import Flask, request, render_template, make_response
 
 from .engine import PdfEngine, MetadataEngine
@@ -31,27 +32,28 @@ def index():
 @app.route('/form', methods=['POST'])
 def form():
 	options = {}
-	options['metadata'] = {
-		'Author': request.form['metadataAuthor'],
-		'Subject': request.form['metadataSubject']
-	}
 	options['arguments'] = shlex.split(request.form['commandLine'])
+	options['--header-html'] = request.form['headerInput']
 	options['html'] = request.form['htmlInput']
+	options['--footer-html'] = request.form['footerInput']
+	options['metadataAuthor'] = request.form['metadataAuthor']
+	options['metadataSubject'] = request.form['metadataSubject']
 	job = ConversionJob(options)
 	return render_pdf(job)
 
 
 def render_pdf(job):
 	bytes = conversion_engine.render(job)
+	job.cleanup_files() # remove temp header and footer
 
 	if len(bytes) < 64:
-		return job.error
+		return html.escape(job.error).replace('\n', '<br>')
 	
 	bytes = metadata_engine.add_metadata(bytes, job.metadata)
 
 	resp = make_response(bytes)
 	resp.headers['Content-Type'] = 'application/pdf'
-	resp.headers['Content-Disposition'] = "attachment; filename=test.pdf"
+	#resp.headers['Content-Disposition'] = "attachment; filename=test.pdf"
 	
 	return resp
 
