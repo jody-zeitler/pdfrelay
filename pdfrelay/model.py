@@ -33,14 +33,12 @@ class ConversionJob(object):
 		self.header_file = '/dev/shm/pdfrelay_header_{}.html'.format(random.randint(1000000, 9999999))
 		with open(self.header_file, 'w') as outfile:
 			outfile.write(html)
-		print('header html: {}'.format(html))
 		return self.header_file
 
 	def make_footer(self, html):
 		self.footer_file = '/dev/shm/pdfrelay_footer_{}.html'.format(random.randint(1000000, 9999999))
 		with open(self.footer_file, 'w') as outfile:
 			outfile.write(html)
-		print('footer html: {}'.format(html))
 		return self.footer_file
 
 	def cleanup_files(self):

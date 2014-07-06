@@ -21,6 +21,7 @@ metadata_engine = None
 def index():
 	if request.method == 'GET':
 		return render_template('index.html')
+
 	elif request.method == 'POST':
 		if request.json:
 			job = ConversionJob(request.json)
@@ -53,7 +54,6 @@ def render_pdf(job):
 
 	resp = make_response(bytes)
 	resp.headers['Content-Type'] = 'application/pdf'
-	#resp.headers['Content-Disposition'] = "attachment; filename=test.pdf"
 	
 	return resp
 

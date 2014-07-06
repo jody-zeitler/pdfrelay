@@ -27,7 +27,6 @@ class PdfEngine(object):
 		arguments.append('-')
 		arguments.append('-')
 
-		print('spawning process: {}'.format(' '.join(str(x) for x in arguments)))
 		proc = subprocess.Popen(
 			arguments,
 			stdin=subprocess.PIPE,
