@@ -3,11 +3,17 @@
 import os
 import random
 
+from .exception import *
+
 class ConversionJob(object):
 	"""Container class for passing around job data"""
 	
 	def __init__(self, options):
-		self.html = options.pop('html')
+		self.html = options.pop('html', None)
+		self.url = options.pop('url', None)
+		if not (self.html or self.url):
+			raise JobError("'html' or 'url' parameter not supplied")
+
 		self.arguments = options.pop('arguments', [])
 		self.metadata = options.pop('metadata', {})
 		self.pdf = None

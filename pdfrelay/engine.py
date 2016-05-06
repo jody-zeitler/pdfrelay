@@ -21,18 +21,23 @@ class PdfEngine(object):
 
 	def render(self, job):
 		html = job.html
+		if html:
+			html = html.encode()
 
 		arguments = list(job.arguments) # copy
 		arguments.insert(0, self.binary_path)
-		arguments.append('-')
+		if job.url is not None:
+			arguments.append(job.url)
+		else:
+			arguments.append('-')
 		arguments.append('-')
 
 		proc = subprocess.Popen(
 			arguments,
-			stdin=subprocess.PIPE,
+			stdin=subprocess.PIPE if html else None,
 			stdout=subprocess.PIPE,
 			stderr=subprocess.PIPE)
-		out,errs = proc.communicate(html.encode(), self.process_timeout)
+		out,errs = proc.communicate(input=html, timeout=self.process_timeout)
 		
 		if errs and len(errs) > 0:
 			job.error = errs.decode()
