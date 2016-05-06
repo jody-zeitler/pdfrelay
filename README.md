@@ -19,7 +19,7 @@ Usage
 
 If uWSGI is set up properly, run the server with `start.sh`, or point your favorite WSGI server to `wsgi.py`. A GET request to `/` renders a test page with form controls. Enter some HTML and hit **Convert Markup** - it should send you a PDF.
 
-A POST request to `/` takes in a JSON object holding command line arguments to wkhtmltopdf as key-value pairs. All options for the executable are passed directly to the binary. Specify metadata with the `metadata<key>` syntax, e.g. `metadataAuthor`.
+A POST request to `/` takes in a JSON object holding command line arguments to wkhtmltopdf as key-value pairs. All options for the executable are passed directly to the binary. Place metadata fields in a `metadata` object. The main input can be supplied as markup in `html` or a remote URL in `url`.
 
 ```
 {
@@ -29,8 +29,10 @@ A POST request to `/` takes in a JSON object holding command line arguments to w
 	"--margin-top": "10",
 	"--margin-bottom": "10",
 	"--javascript-delay": "2000",
-	"metadataAuthor": "Jody Zeitler",
-	"metadataSubject": "Example PDF"
+	"metadata": {
+		"Author": "Jody Zeitler",
+		"Subject": "Example PDF"
+	}
 }
 ```
 
